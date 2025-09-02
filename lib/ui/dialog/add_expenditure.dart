@@ -18,7 +18,7 @@ class AddExpenditureDialog extends StatefulWidget {
 
 class AddExpenditureDialogState extends State<AddExpenditureDialog> {
   DateTime _date = DateTime.now();
-  double _cost = 10.17;
+  double _cost = 11.39;
 
   Store store = Store();
 
