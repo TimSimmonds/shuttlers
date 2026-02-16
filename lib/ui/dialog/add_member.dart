@@ -137,7 +137,7 @@ class AddMemberDialogState extends State<AddMemberDialog> {
                   child: Center(
                       child: Text(
                     "£${_startingBalance.toStringAsFixed(2)}",
-                    style: Theme.of(context).textTheme.headline6,
+                    style: Theme.of(context).textTheme.titleLarge,
                   )),
                 ),
                 HoldDetector(
@@ -188,7 +188,7 @@ class AddMemberDialogState extends State<AddMemberDialog> {
                     style: TextStyle(color: Colors.white),
                   ),
                   style: ButtonStyle(
-                      backgroundColor: MaterialStateProperty.all(
+                      backgroundColor: WidgetStateProperty.all(
                           Theme.of(context).primaryColor)),
                 )
               // : _currentStep == 1
@@ -219,7 +219,7 @@ class AddMemberDialogState extends State<AddMemberDialog> {
                               style: TextStyle(color: Colors.white),
                             ),
                             style: ButtonStyle(
-                                backgroundColor: MaterialStateProperty.all(
+                                backgroundColor: WidgetStateProperty.all(
                                     Theme.of(context).primaryColor)),
                           ),
                           SizedBox(

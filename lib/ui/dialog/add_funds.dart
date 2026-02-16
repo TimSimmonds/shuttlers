@@ -104,7 +104,7 @@ class AddFundsDialogState extends State<AddFundsDialog> {
                   child: Center(
                       child: Text(
                     "${prettyDate(_date)}",
-                    style: Theme.of(context).textTheme.headline6,
+                    style: Theme.of(context).textTheme.titleLarge,
                   )),
                 ),
                 GestureDetector(
@@ -180,7 +180,7 @@ class AddFundsDialogState extends State<AddFundsDialog> {
                   child: Center(
                       child: Text(
                     "£${_fundsToAdd.toStringAsFixed(2)}",
-                    style: Theme.of(context).textTheme.headline6,
+                    style: Theme.of(context).textTheme.titleLarge,
                   )),
                 ),
                 HoldDetector(
@@ -263,7 +263,7 @@ class AddFundsDialogState extends State<AddFundsDialog> {
                     style: TextStyle(color: Colors.white),
                   ),
                   style: ButtonStyle(
-                      backgroundColor: MaterialStateProperty.all(
+                      backgroundColor: WidgetStateProperty.all(
                           Theme.of(context).primaryColor)),
                 )
               : _currentStep <= 1
@@ -278,7 +278,7 @@ class AddFundsDialogState extends State<AddFundsDialog> {
                               style: TextStyle(color: Colors.white),
                             ),
                             style: ButtonStyle(
-                                backgroundColor: MaterialStateProperty.all(
+                                backgroundColor: WidgetStateProperty.all(
                                     Theme.of(context).primaryColor)),
                           ),
                           SizedBox(
@@ -303,7 +303,7 @@ class AddFundsDialogState extends State<AddFundsDialog> {
                                   style: TextStyle(color: Colors.white),
                                 ),
                                 style: ButtonStyle(
-                                    backgroundColor: MaterialStateProperty.all(
+                                    backgroundColor: WidgetStateProperty.all(
                                         Theme.of(context).primaryColor)),
                               ),
                               SizedBox(
