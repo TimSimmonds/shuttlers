@@ -190,16 +190,26 @@ class _MenuScreenState extends State<MenuScreen> {
       );
 
   Future<void> passwordDialog(BuildContext context) async {
+    TextEditingController _emailController = TextEditingController();
     TextEditingController _passwordController = TextEditingController();
     return showDialog(
         context: context,
         builder: (context) {
           return AlertDialog(
             title: Text('Login'),
-            content: TextField(
-              obscureText: true,
-              controller: _passwordController,
-              decoration: InputDecoration(hintText: 'Enter Password'),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                TextField(
+                  controller: _emailController,
+                  decoration: InputDecoration(hintText: 'Enter Email'),
+                ),
+                TextField(
+                  obscureText: true,
+                  controller: _passwordController,
+                  decoration: InputDecoration(hintText: 'Enter Password'),
+                ),
+              ],
             ),
             actions: [
               TextButton(
@@ -215,7 +225,7 @@ class _MenuScreenState extends State<MenuScreen> {
                 onPressed: () async {
                   try {
                     await auth.signInWithEmailAndPassword(
-                        email: 'tim.simmonds1@gmail.com',
+                        email: _emailController.text,
                         password: _passwordController.text);
                     ScaffoldMessenger.of(context)
                         .showSnackBar(SnackBar(content: Text("Logged in!")));

@@ -263,7 +263,7 @@ class AddFundsDialogState extends State<AddFundsDialog> {
                     style: TextStyle(color: Colors.white),
                   ),
                   style: ButtonStyle(
-                      backgroundColor: MaterialStateProperty.all(
+                      backgroundColor: WidgetStateProperty.all(
                           Theme.of(context).primaryColor)),
                 )
               : _currentStep <= 1
@@ -278,7 +278,7 @@ class AddFundsDialogState extends State<AddFundsDialog> {
                               style: TextStyle(color: Colors.white),
                             ),
                             style: ButtonStyle(
-                                backgroundColor: MaterialStateProperty.all(
+                                backgroundColor: WidgetStateProperty.all(
                                     Theme.of(context).primaryColor)),
                           ),
                           SizedBox(
@@ -303,7 +303,7 @@ class AddFundsDialogState extends State<AddFundsDialog> {
                                   style: TextStyle(color: Colors.white),
                                 ),
                                 style: ButtonStyle(
-                                    backgroundColor: MaterialStateProperty.all(
+                                    backgroundColor: WidgetStateProperty.all(
                                         Theme.of(context).primaryColor)),
                               ),
                               SizedBox(

@@ -408,7 +408,7 @@ class AddExpenditureDialogState extends State<AddExpenditureDialog> {
                     style: TextStyle(color: Colors.white),
                   ),
                   style: ButtonStyle(
-                      backgroundColor: MaterialStateProperty.all(
+                      backgroundColor: WidgetStateProperty.all(
                           Theme.of(context).primaryColor)),
                 )
               : _currentStep <= 2
@@ -423,7 +423,7 @@ class AddExpenditureDialogState extends State<AddExpenditureDialog> {
                               style: TextStyle(color: Colors.white),
                             ),
                             style: ButtonStyle(
-                                backgroundColor: MaterialStateProperty.all(
+                                backgroundColor: WidgetStateProperty.all(
                                     Theme.of(context).primaryColor)),
                           ),
                           SizedBox(
@@ -447,7 +447,7 @@ class AddExpenditureDialogState extends State<AddExpenditureDialog> {
                               style: TextStyle(color: Colors.white),
                             ),
                             style: ButtonStyle(
-                                backgroundColor: MaterialStateProperty.all(
+                                backgroundColor: WidgetStateProperty.all(
                                     Theme.of(context).primaryColor)),
                           ),
                           SizedBox(
