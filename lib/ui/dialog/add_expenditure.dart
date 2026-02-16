@@ -154,7 +154,7 @@ class AddExpenditureDialogState extends State<AddExpenditureDialog> {
                   child: Center(
                       child: Text(
                     "${prettyDate(_date)}",
-                    style: Theme.of(context).textTheme.headline6,
+                    style: Theme.of(context).textTheme.titleLarge,
                   )),
                 ),
                 GestureDetector(
@@ -230,7 +230,7 @@ class AddExpenditureDialogState extends State<AddExpenditureDialog> {
                   child: Center(
                       child: Text(
                     "£${_cost.toStringAsFixed(2)}",
-                    style: Theme.of(context).textTheme.headline6,
+                    style: Theme.of(context).textTheme.titleLarge,
                   )),
                 ),
                 HoldDetector(
