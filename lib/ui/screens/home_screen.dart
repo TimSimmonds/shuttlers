@@ -20,7 +20,7 @@ class _HomeState extends State<Home> {
   @override
   Widget build(BuildContext context) {
     return ZoomDrawer(
-      style: DrawerStyle.Style1,
+      style: DrawerStyle.style1,
       menuScreen: Builder(
         builder: (context) => MenuScreen(
           currentItem: currentItem,
@@ -33,7 +33,7 @@ class _HomeState extends State<Home> {
       mainScreen: getScreen(),
       showShadow: true,
       angle: -12.0,
-      backgroundColor: Theme.of(context).primaryColor,
+      menuBackgroundColor: Theme.of(context).primaryColor,
       slideWidth: MediaQuery.of(context).size.width * 0.65,
     );
   }
@@ -98,7 +98,7 @@ class _MenuScreenState extends State<MenuScreen> {
     return Theme(
       data: ThemeData.dark(),
       child: Scaffold(
-        backgroundColor: Theme.of(context).backgroundColor,
+        backgroundColor: Theme.of(context).colorScheme.surface,
         body: SafeArea(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,

@@ -104,7 +104,7 @@ class AddFundsDialogState extends State<AddFundsDialog> {
                   child: Center(
                       child: Text(
                     "${prettyDate(_date)}",
-                    style: Theme.of(context).textTheme.headline6,
+                    style: Theme.of(context).textTheme.titleLarge,
                   )),
                 ),
                 GestureDetector(
@@ -180,7 +180,7 @@ class AddFundsDialogState extends State<AddFundsDialog> {
                   child: Center(
                       child: Text(
                     "£${_fundsToAdd.toStringAsFixed(2)}",
-                    style: Theme.of(context).textTheme.headline6,
+                    style: Theme.of(context).textTheme.titleLarge,
                   )),
                 ),
                 HoldDetector(
