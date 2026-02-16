@@ -3,7 +3,8 @@
    <application
         android:name="androidx.multidex.MultiDexApplication"
         android:label="shuttlers"
-        android:icon="@mipmap/launcher_icon">
+        android:icon="@mipmap/launcher_icon"
+        android:allowBackup="false">
         <activity
             android:name=".MainActivity"
             android:launchMode="singleTop"
