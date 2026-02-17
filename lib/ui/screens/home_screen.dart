@@ -202,10 +202,14 @@ class _MenuScreenState extends State<MenuScreen> {
               children: [
                 TextField(
                   controller: _emailController,
+                  keyboardType: TextInputType.emailAddress,
+                  autocorrect: false,
                   decoration: InputDecoration(hintText: 'Enter Email'),
                 ),
                 TextField(
                   obscureText: true,
+                  autocorrect: false,
+                  enableSuggestions: false,
                   controller: _passwordController,
                   decoration: InputDecoration(hintText: 'Enter Password'),
                 ),
@@ -254,11 +258,15 @@ class _MenuScreenState extends State<MenuScreen> {
               children: [
                 TextFormField(
                   obscureText: true,
+                  autocorrect: false,
+                  enableSuggestions: false,
                   controller: _passwordController,
                   decoration: InputDecoration(hintText: 'Enter New Password'),
                 ),
                 TextFormField(
                   obscureText: true,
+                  autocorrect: false,
+                  enableSuggestions: false,
                   controller: _passwordControllerConfirm,
                   decoration: InputDecoration(hintText: 'Confirm New Password'),
                 )
@@ -289,7 +297,6 @@ class _MenuScreenState extends State<MenuScreen> {
                       ScaffoldMessenger.of(context).showSnackBar(
                           SnackBar(content: Text("Password changed!")));
                     } catch (e) {
-                      print(e);
                       ScaffoldMessenger.of(context).showSnackBar(
                           SnackBar(content: Text("Something went wrong.")));
                     }
