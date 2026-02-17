@@ -102,7 +102,6 @@ class AddExpenditureDialogState extends State<AddExpenditureDialog> {
   }
 
   Future<List<Member>> loadMembers() async {
-    print('real future is here');
     List<Member> temp = [];
     Store().member.get().then((value) {
       value.docs.forEach((element) {
