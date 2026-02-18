@@ -204,6 +204,7 @@ class _MenuScreenState extends State<MenuScreen> {
                   controller: _emailController,
                   keyboardType: TextInputType.emailAddress,
                   autocorrect: false,
+                  enableSuggestions: false,
                   decoration: InputDecoration(hintText: 'Enter Email'),
                 ),
                 TextField(
