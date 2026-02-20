@@ -28,26 +28,22 @@ class MemberCardAdmin extends StatelessWidget {
               TextButton(
                 child: Text('DELETE'),
                 onPressed: () async {
-                  await FirebaseFirestore.instance
+                  // Use WriteBatch for atomic deletion and balance update
+                  final batch = FirebaseFirestore.instance.batch();
+                  final memberDoc = FirebaseFirestore.instance
                       .collection(memberRef)
-                      .doc(member.id)
-                      .delete();
-                  double _bankBalance = await FirebaseFirestore.instance
+                      .doc(member.id);
+                  final overviewDoc = FirebaseFirestore.instance
                       .collection(overviewRef)
-                      .doc("0")
-                      .get()
-                      .then((DocumentSnapshot data) {
-                    Map<String, dynamic> temp =
-                        data.data() as Map<String, dynamic>;
+                      .doc("0");
 
-                    return temp['bank'];
+                  batch.delete(memberDoc);
+                  // Use FieldValue.increment to ensure atomic balance update and avoid race conditions
+                  batch.update(overviewDoc, {
+                    'bank': FieldValue.increment(-member.bank),
                   });
-                  await FirebaseFirestore.instance
-                      .collection(overviewRef)
-                      .doc("0")
-                      .update({
-                    'bank': _bankBalance - member.bank,
-                  });
+
+                  await batch.commit();
                   Navigator.of(context).pop();
                 },
               ),
