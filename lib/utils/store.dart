@@ -115,4 +115,11 @@ class Store {
 
     batch.commit();
   }
+
+  Future<void> deleteMember(Member data) async {
+    WriteBatch batch = FirebaseFirestore.instance.batch();
+    batch.delete(member.doc(data.id));
+    batch.update(overview, {'bank': FieldValue.increment(-data.bank)});
+    return batch.commit();
+  }
 }
