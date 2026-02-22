@@ -7,3 +7,9 @@
 - **Impact:** OS-level keyboard might cache user emails, potentially exposing them.
 - **Fix:** Added `enableSuggestions: false` to the email `TextField` in `lib/ui/screens/home_screen.dart`.
 - **Date:** 2023-10-27
+
+### [HIGH] Non-Atomic Member Deletion and Global Balance Update
+- **Issue:** Deleting a member and updating the global bank balance was performed as separate, non-atomic Firestore operations.
+- **Impact:** Risk of data inconsistency and race conditions if one operation fails or if multiple admins perform operations simultaneously.
+- **Fix:** Implemented `deleteMember` in `Store` class using `WriteBatch` and `FieldValue.increment` to ensure both operations are atomic. Refactored `MemberCardAdmin` to use this new method.
+- **Date:** 2023-10-27
