@@ -1,25 +1,31 @@
 import 'package:firebase_auth/firebase_auth.dart';
 
 class Auth {
-  FirebaseAuth auth = FirebaseAuth.instance;
-  User? user;
+  final FirebaseAuth _auth = FirebaseAuth.instance;
 
-  get currentUser {
-    return auth.currentUser;
-  }
+  User? get currentUser => _auth.currentUser;
+
+  Stream<User?> authStateChanges() => _auth.authStateChanges();
 
   Future<void> signIn({required String email, required String password}) async {
-    await auth.signInWithEmailAndPassword(email: email, password: password);
+    await _auth.signInWithEmailAndPassword(email: email, password: password);
   }
 
-  Future<void> changePassowrd({
-    //required String email,
-    required String password,
+  Future<void> signOut() => _auth.signOut();
+
+  Future<void> changePassword({
+    required String currentPassword,
     required String newPassword,
   }) async {
-    String email = auth.currentUser!.email.toString();
-    await auth.signOut();
-    await auth.signInWithEmailAndPassword(email: email, password: password);
-    await auth.currentUser!.updatePassword(newPassword);
+    final user = _auth.currentUser;
+    if (user == null) throw Exception("No user logged in");
+
+    AuthCredential credential = EmailAuthProvider.credential(
+      email: user.email!,
+      password: currentPassword,
+    );
+
+    await user.reauthenticateWithCredential(credential);
+    await user.updatePassword(newPassword);
   }
 }
