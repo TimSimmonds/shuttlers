@@ -1,10 +1,9 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:shuttlers/data.dart';
 import 'package:shuttlers/model/member.dart';
 import 'package:shuttlers/ui/dialog/add_funds.dart';
 import 'package:shuttlers/ui/screens/member_history.dart';
 import 'package:shuttlers/utils/pretty.dart';
+import 'package:shuttlers/utils/store.dart';
 
 class MemberCardAdmin extends StatelessWidget {
   final Member member;
@@ -28,26 +27,12 @@ class MemberCardAdmin extends StatelessWidget {
               TextButton(
                 child: Text('DELETE'),
                 onPressed: () async {
-                  await FirebaseFirestore.instance
-                      .collection(memberRef)
-                      .doc(member.id)
-                      .delete();
-                  double _bankBalance = await FirebaseFirestore.instance
-                      .collection(overviewRef)
-                      .doc("0")
-                      .get()
-                      .then((DocumentSnapshot data) {
-                    Map<String, dynamic> temp =
-                        data.data() as Map<String, dynamic>;
-
-                    return temp['bank'];
-                  });
-                  await FirebaseFirestore.instance
-                      .collection(overviewRef)
-                      .doc("0")
-                      .update({
-                    'bank': _bankBalance - member.bank,
-                  });
+                  try {
+                    await Store().deleteMember(member);
+                  } catch (e) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text("Failed to delete member.")));
+                  }
                   Navigator.of(context).pop();
                 },
               ),
