@@ -12,14 +12,31 @@ class Auth {
     await auth.signInWithEmailAndPassword(email: email, password: password);
   }
 
-  Future<void> changePassowrd({
-    //required String email,
-    required String password,
+  Future<void> changePassword({
+    required String currentPassword,
     required String newPassword,
   }) async {
-    String email = auth.currentUser!.email.toString();
+    final user = auth.currentUser;
+    if (user != null && user.email != null) {
+      AuthCredential credential = EmailAuthProvider.credential(
+        email: user.email!,
+        password: currentPassword,
+      );
+      await user.reauthenticateWithCredential(credential);
+      await user.updatePassword(newPassword);
+    } else {
+      throw FirebaseAuthException(
+        code: 'no-user',
+        message: 'No user is currently signed in.',
+      );
+    }
+  }
+
+  Future<void> signOut() async {
     await auth.signOut();
-    await auth.signInWithEmailAndPassword(email: email, password: password);
-    await auth.currentUser!.updatePassword(newPassword);
+  }
+
+  Stream<User?> authStateChanges() {
+    return auth.authStateChanges();
   }
 }
