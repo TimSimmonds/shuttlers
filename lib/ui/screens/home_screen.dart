@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_zoom_drawer/flutter_zoom_drawer.dart';
 import 'package:shuttlers/ui/screens/ledger_screen.dart';
 import 'package:shuttlers/ui/screens/member_screen.dart';
+import 'package:shuttlers/utils/auth.dart';
 import 'package:shuttlers/utils/pretty.dart';
 import 'package:shuttlers/utils/store.dart';
 
@@ -79,13 +80,13 @@ class MenuScreen extends StatefulWidget {
 }
 
 class _MenuScreenState extends State<MenuScreen> {
-  FirebaseAuth auth = FirebaseAuth.instance;
+  final Auth _auth = Auth();
   User? user;
   Store store = Store();
 
   @override
   void initState() {
-    auth.authStateChanges().listen((usr) {
+    _auth.authStateChanges.listen((usr) {
       setState(() {
         this.user = usr;
       });
@@ -156,7 +157,7 @@ class _MenuScreenState extends State<MenuScreen> {
                 onTap: () async {
                   user == null
                       ? await passwordDialog(context)
-                      : await auth.signOut();
+                      : await _auth.signOut();
                   //setState(() {});
                   ZoomDrawer.of(context)!.toggle();
                 },
@@ -220,33 +221,35 @@ class _MenuScreenState extends State<MenuScreen> {
               TextButton(
                 child: Text('CANCEL'),
                 onPressed: () {
-                  setState(() {
-                    Navigator.pop(context);
-                  });
+                  Navigator.pop(context);
                 },
               ),
               TextButton(
                 child: Text('LOGIN'),
                 onPressed: () async {
                   try {
-                    await auth.signInWithEmailAndPassword(
+                    await _auth.signIn(
                         email: _emailController.text,
                         password: _passwordController.text);
                     ScaffoldMessenger.of(context)
                         .showSnackBar(SnackBar(content: Text("Logged in!")));
+                    Navigator.pop(context);
                   } catch (e) {
                     ScaffoldMessenger.of(context)
                         .showSnackBar(SnackBar(content: Text("Login failed.")));
                   }
-                  Navigator.pop(context);
                 },
               ),
             ],
           );
-        });
+        }).then((_) {
+      _emailController.dispose();
+      _passwordController.dispose();
+    });
   }
 
   Future<void> _changePasswordDialog(BuildContext context) async {
+    TextEditingController _currentPasswordController = TextEditingController();
     TextEditingController _passwordController = TextEditingController();
     TextEditingController _passwordControllerConfirm = TextEditingController();
     return showDialog(
@@ -257,6 +260,13 @@ class _MenuScreenState extends State<MenuScreen> {
             content: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
+                TextFormField(
+                  obscureText: true,
+                  autocorrect: false,
+                  enableSuggestions: false,
+                  controller: _currentPasswordController,
+                  decoration: InputDecoration(hintText: 'Enter Current Password'),
+                ),
                 TextFormField(
                   obscureText: true,
                   autocorrect: false,
@@ -277,26 +287,21 @@ class _MenuScreenState extends State<MenuScreen> {
               TextButton(
                 child: Text('CANCEL'),
                 onPressed: () {
-                  setState(() {
-                    Navigator.pop(context);
-                  });
+                  Navigator.pop(context);
                 },
               ),
               TextButton(
                 child: Text('CHANGE'),
                 onPressed: () async {
-                  setState(() {});
-
                   if (_passwordController.text ==
                       _passwordControllerConfirm.text) {
                     try {
-                      // if persistance causing issues with the signedIn bool could just sign out before anyone logs in?!
-                      //await auth.signOut();
-
-                      await auth.currentUser!
-                          .updatePassword(_passwordController.text);
+                      await _auth.changePassword(
+                          currentPassword: _currentPasswordController.text,
+                          newPassword: _passwordController.text);
                       ScaffoldMessenger.of(context).showSnackBar(
                           SnackBar(content: Text("Password changed!")));
+                      Navigator.pop(context);
                     } catch (e) {
                       ScaffoldMessenger.of(context).showSnackBar(
                           SnackBar(content: Text("Something went wrong.")));
@@ -305,12 +310,14 @@ class _MenuScreenState extends State<MenuScreen> {
                     ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(content: Text("Passwords didn't match!")));
                   }
-
-                  Navigator.pop(context);
                 },
               ),
             ],
           );
-        });
+        }).then((_) {
+      _currentPasswordController.dispose();
+      _passwordController.dispose();
+      _passwordControllerConfirm.dispose();
+    });
   }
 }
