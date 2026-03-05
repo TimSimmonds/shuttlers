@@ -2,9 +2,10 @@ import 'package:firebase_auth/firebase_auth.dart';
 
 class Auth {
   FirebaseAuth auth = FirebaseAuth.instance;
-  User? user;
 
-  get currentUser {
+  Stream<User?> get authStateChanges => auth.authStateChanges();
+
+  User? get currentUser {
     return auth.currentUser;
   }
 
@@ -12,14 +13,26 @@ class Auth {
     await auth.signInWithEmailAndPassword(email: email, password: password);
   }
 
-  Future<void> changePassowrd({
-    //required String email,
+  Future<void> signOut() async {
+    await auth.signOut();
+  }
+
+  Future<void> changePassword({
     required String password,
     required String newPassword,
   }) async {
-    String email = auth.currentUser!.email.toString();
-    await auth.signOut();
-    await auth.signInWithEmailAndPassword(email: email, password: password);
-    await auth.currentUser!.updatePassword(newPassword);
+    final user = auth.currentUser;
+    if (user == null || user.email == null) {
+      throw Exception('No user signed in');
+    }
+
+    // Re-authenticate user before changing password
+    AuthCredential credential = EmailAuthProvider.credential(
+      email: user.email!,
+      password: password,
+    );
+
+    await user.reauthenticateWithCredential(credential);
+    await user.updatePassword(newPassword);
   }
 }
