@@ -1,9 +1,12 @@
+import 'dart:async';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_zoom_drawer/flutter_zoom_drawer.dart';
 import 'package:shuttlers/ui/screens/ledger_screen.dart';
 import 'package:shuttlers/ui/screens/member_screen.dart';
+import 'package:shuttlers/utils/auth.dart';
 import 'package:shuttlers/utils/pretty.dart';
 import 'package:shuttlers/utils/store.dart';
 
@@ -79,18 +82,27 @@ class MenuScreen extends StatefulWidget {
 }
 
 class _MenuScreenState extends State<MenuScreen> {
-  FirebaseAuth auth = FirebaseAuth.instance;
+  final Auth auth = Auth();
   User? user;
   Store store = Store();
+  StreamSubscription? _authSubscription;
 
   @override
   void initState() {
-    auth.authStateChanges().listen((usr) {
-      setState(() {
-        this.user = usr;
-      });
+    _authSubscription = auth.authStateChanges.listen((usr) {
+      if (mounted) {
+        setState(() {
+          this.user = usr;
+        });
+      }
     });
     super.initState();
+  }
+
+  @override
+  void dispose() {
+    _authSubscription?.cancel();
+    super.dispose();
   }
 
   @override
@@ -154,11 +166,14 @@ class _MenuScreenState extends State<MenuScreen> {
                 leading: user == null ? Icon(Icons.login) : Icon(Icons.logout),
                 title: user == null ? Text("Login") : Text("Logout"),
                 onTap: () async {
-                  user == null
-                      ? await passwordDialog(context)
-                      : await auth.signOut();
-                  //setState(() {});
-                  ZoomDrawer.of(context)!.toggle();
+                  if (user == null) {
+                    await passwordDialog(context);
+                  } else {
+                    await auth.signOut();
+                  }
+                  if (mounted) {
+                    ZoomDrawer.of(context)!.toggle();
+                  }
                 },
               ),
               user == null
@@ -169,7 +184,9 @@ class _MenuScreenState extends State<MenuScreen> {
                       title: Text('Change Password'),
                       onTap: () async {
                         await _changePasswordDialog(context);
-                        ZoomDrawer.of(context)!.toggle();
+                        if (mounted) {
+                          ZoomDrawer.of(context)!.toggle();
+                        }
                       },
                     ),
             ],
@@ -190,9 +207,9 @@ class _MenuScreenState extends State<MenuScreen> {
       );
 
   Future<void> passwordDialog(BuildContext context) async {
-    TextEditingController _emailController = TextEditingController();
-    TextEditingController _passwordController = TextEditingController();
-    return showDialog(
+    final TextEditingController _emailController = TextEditingController();
+    final TextEditingController _passwordController = TextEditingController();
+    await showDialog(
         context: context,
         builder: (context) {
           return AlertDialog(
@@ -220,37 +237,49 @@ class _MenuScreenState extends State<MenuScreen> {
               TextButton(
                 child: Text('CANCEL'),
                 onPressed: () {
-                  setState(() {
-                    Navigator.pop(context);
-                  });
+                  Navigator.pop(context);
                 },
               ),
               TextButton(
                 child: Text('LOGIN'),
                 onPressed: () async {
                   try {
-                    await auth.signInWithEmailAndPassword(
+                    await auth.signIn(
                         email: _emailController.text,
                         password: _passwordController.text);
-                    ScaffoldMessenger.of(context)
-                        .showSnackBar(SnackBar(content: Text("Logged in!")));
+                    if (context.mounted) {
+                      ScaffoldMessenger.of(context)
+                          .showSnackBar(SnackBar(content: Text("Logged in!")));
+                    }
                   } catch (e) {
-                    ScaffoldMessenger.of(context)
-                        .showSnackBar(SnackBar(content: Text("Login failed.")));
+                    if (context.mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(content: Text("Login failed.")));
+                    }
                   }
-                  Navigator.pop(context);
+                  if (context.mounted) {
+                    Navigator.pop(context);
+                  }
                 },
               ),
             ],
           );
         });
+    _emailController.dispose();
+    _passwordController.dispose();
   }
 
   Future<void> _changePasswordDialog(BuildContext context) async {
-    TextEditingController _passwordController = TextEditingController();
-    TextEditingController _passwordControllerConfirm = TextEditingController();
-    return showDialog(
+    final TextEditingController _currentPasswordController =
+        TextEditingController();
+    final TextEditingController _newPasswordController =
+        TextEditingController();
+    final TextEditingController _newPasswordConfirmController =
+        TextEditingController();
+
+    await showDialog(
         context: context,
+        barrierDismissible: false,
         builder: (context) {
           return AlertDialog(
             title: Text('Change Password'),
@@ -261,14 +290,21 @@ class _MenuScreenState extends State<MenuScreen> {
                   obscureText: true,
                   autocorrect: false,
                   enableSuggestions: false,
-                  controller: _passwordController,
-                  decoration: InputDecoration(hintText: 'Enter New Password'),
+                  controller: _currentPasswordController,
+                  decoration: InputDecoration(hintText: 'Current Password'),
                 ),
                 TextFormField(
                   obscureText: true,
                   autocorrect: false,
                   enableSuggestions: false,
-                  controller: _passwordControllerConfirm,
+                  controller: _newPasswordController,
+                  decoration: InputDecoration(hintText: 'New Password'),
+                ),
+                TextFormField(
+                  obscureText: true,
+                  autocorrect: false,
+                  enableSuggestions: false,
+                  controller: _newPasswordConfirmController,
                   decoration: InputDecoration(hintText: 'Confirm New Password'),
                 )
               ],
@@ -277,40 +313,49 @@ class _MenuScreenState extends State<MenuScreen> {
               TextButton(
                 child: Text('CANCEL'),
                 onPressed: () {
-                  setState(() {
-                    Navigator.pop(context);
-                  });
+                  Navigator.pop(context);
                 },
               ),
               TextButton(
                 child: Text('CHANGE'),
                 onPressed: () async {
-                  setState(() {});
-
-                  if (_passwordController.text ==
-                      _passwordControllerConfirm.text) {
-                    try {
-                      // if persistance causing issues with the signedIn bool could just sign out before anyone logs in?!
-                      //await auth.signOut();
-
-                      await auth.currentUser!
-                          .updatePassword(_passwordController.text);
-                      ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(content: Text("Password changed!")));
-                    } catch (e) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(content: Text("Something went wrong.")));
-                    }
-                  } else {
+                  if (_newPasswordController.text !=
+                      _newPasswordConfirmController.text) {
                     ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text("Passwords didn't match!")));
+                        SnackBar(content: Text("New passwords don't match!")));
+                    return;
                   }
 
-                  Navigator.pop(context);
+                  if (_newPasswordController.text.isEmpty) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text("New password cannot be empty!")));
+                    return;
+                  }
+
+                  try {
+                    await auth.changePassword(
+                      password: _currentPasswordController.text,
+                      newPassword: _newPasswordController.text,
+                    );
+                    if (context.mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(content: Text("Password changed!")));
+                      Navigator.pop(context);
+                    }
+                  } catch (e) {
+                    if (context.mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                          content: Text("Error: ${e.toString()}")));
+                    }
+                  }
                 },
               ),
             ],
           );
         });
+
+    _currentPasswordController.dispose();
+    _newPasswordController.dispose();
+    _newPasswordConfirmController.dispose();
   }
 }
