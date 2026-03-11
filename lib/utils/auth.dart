@@ -12,14 +12,22 @@ class Auth {
     await auth.signInWithEmailAndPassword(email: email, password: password);
   }
 
-  Future<void> changePassowrd({
-    //required String email,
+  Future<void> changePassword({
     required String password,
     required String newPassword,
   }) async {
-    String email = auth.currentUser!.email.toString();
-    await auth.signOut();
-    await auth.signInWithEmailAndPassword(email: email, password: password);
-    await auth.currentUser!.updatePassword(newPassword);
+    User? user = auth.currentUser;
+    if (user != null && user.email != null) {
+      AuthCredential credential = EmailAuthProvider.credential(
+        email: user.email!,
+        password: password,
+      );
+
+      // Re-authenticate the user before updating the password
+      await user.reauthenticateWithCredential(credential);
+      await user.updatePassword(newPassword);
+    } else {
+      throw Exception("No user signed in or email missing.");
+    }
   }
 }
