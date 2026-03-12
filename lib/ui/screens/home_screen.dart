@@ -247,9 +247,10 @@ class _MenuScreenState extends State<MenuScreen> {
   }
 
   Future<void> _changePasswordDialog(BuildContext context) async {
+    TextEditingController _currentPasswordController = TextEditingController();
     TextEditingController _passwordController = TextEditingController();
     TextEditingController _passwordControllerConfirm = TextEditingController();
-    return showDialog(
+    await showDialog(
         context: context,
         builder: (context) {
           return AlertDialog(
@@ -257,6 +258,13 @@ class _MenuScreenState extends State<MenuScreen> {
             content: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
+                TextFormField(
+                  obscureText: true,
+                  autocorrect: false,
+                  enableSuggestions: false,
+                  controller: _currentPasswordController,
+                  decoration: InputDecoration(hintText: 'Current Password'),
+                ),
                 TextFormField(
                   obscureText: true,
                   autocorrect: false,
@@ -290,27 +298,37 @@ class _MenuScreenState extends State<MenuScreen> {
                   if (_passwordController.text ==
                       _passwordControllerConfirm.text) {
                     try {
-                      // if persistance causing issues with the signedIn bool could just sign out before anyone logs in?!
-                      //await auth.signOut();
-
+                      AuthCredential credential = EmailAuthProvider.credential(
+                        email: auth.currentUser!.email!,
+                        password: _currentPasswordController.text,
+                      );
+                      await auth.currentUser!.reauthenticateWithCredential(credential);
                       await auth.currentUser!
                           .updatePassword(_passwordController.text);
-                      ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(content: Text("Password changed!")));
+                      if (context.mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(content: Text("Password changed!")));
+                        Navigator.pop(context);
+                      }
                     } catch (e) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(content: Text("Something went wrong.")));
+                      if (context.mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(content: Text("Authentication failed or something went wrong.")));
+                      }
                     }
                   } else {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text("Passwords didn't match!")));
+                    if (context.mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(content: Text("Passwords didn't match!")));
+                    }
                   }
-
-                  Navigator.pop(context);
                 },
               ),
             ],
           );
         });
+    _currentPasswordController.dispose();
+    _passwordController.dispose();
+    _passwordControllerConfirm.dispose();
   }
 }
