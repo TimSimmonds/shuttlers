@@ -6,6 +6,17 @@ import 'package:shuttlers/data.dart';
 import 'package:shuttlers/utils/math.dart';
 
 class Store {
+  // ⚡ Bolt Optimization: Use a Singleton pattern for the Store class.
+  // This prevents multiple initializations of Firestore collection/document references
+  // across different screens and dialogs, reducing memory footprint and unnecessary object creation.
+  Store._privateConstructor();
+
+  static final Store _instance = Store._privateConstructor();
+
+  factory Store() {
+    return _instance;
+  }
+
   DocumentReference overview =
       FirebaseFirestore.instance.collection(overviewRef).doc('0');
   CollectionReference member = FirebaseFirestore.instance.collection(memberRef);
