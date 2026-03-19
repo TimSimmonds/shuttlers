@@ -95,12 +95,16 @@ class Store {
     });
 
     //this can be done better, i'm sure of it
-    List<String> memberIds = [];
-    List<String> memberString = [];
-    members.reversed.forEach((memberData) {
-      memberIds.add(memberData.id);
-      memberString.add(memberData.name);
-    });
+    // ⚡ Bolt: Used standard for-loop with pre-allocated lists to optimize iteration
+    // over reversed list, improving performance by avoiding multiple reallocations.
+    int length = members.length;
+    List<String> memberIds = List<String>.filled(length, "");
+    List<String> memberString = List<String>.filled(length, "");
+    for (int i = 0; i < length; i++) {
+      var m = members[length - 1 - i];
+      memberIds[i] = m.id;
+      memberString[i] = m.name;
+    }
     memberString.sort();
     String mString = memberString.join(', ');
 
