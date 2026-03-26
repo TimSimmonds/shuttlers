@@ -94,14 +94,8 @@ class Store {
           member.doc(data.id), {'bank': FieldValue.increment(-_costPerMember)});
     });
 
-    //this can be done better, i'm sure of it
-    List<String> memberIds = [];
-    List<String> memberString = [];
-    members.reversed.forEach((memberData) {
-      memberIds.add(memberData.id);
-      memberString.add(memberData.name);
-    });
-    memberString.sort();
+    final memberIds = members.reversed.map((m) => m.id).toList();
+    final memberString = members.map((m) => m.name).toList()..sort();
     String mString = memberString.join(', ');
 
     batch.set(ledger.doc(), {
