@@ -6,6 +6,17 @@ import 'package:shuttlers/data.dart';
 import 'package:shuttlers/utils/math.dart';
 
 class Store {
+  // Singleton instance
+  static final Store _instance = Store._internal();
+
+  // Factory constructor
+  factory Store() {
+    return _instance;
+  }
+
+  // Internal constructor
+  Store._internal();
+
   DocumentReference overview =
       FirebaseFirestore.instance.collection(overviewRef).doc('0');
   CollectionReference member = FirebaseFirestore.instance.collection(memberRef);
