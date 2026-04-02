@@ -6,6 +6,7 @@ import 'package:shuttlers/ui/screens/ledger_screen.dart';
 import 'package:shuttlers/ui/screens/member_screen.dart';
 import 'package:shuttlers/utils/pretty.dart';
 import 'package:shuttlers/utils/store.dart';
+import 'package:shuttlers/utils/auth.dart';
 
 class Home extends StatefulWidget {
   const Home({Key? key}) : super(key: key);
@@ -247,6 +248,7 @@ class _MenuScreenState extends State<MenuScreen> {
   }
 
   Future<void> _changePasswordDialog(BuildContext context) async {
+    TextEditingController _currentPasswordController = TextEditingController();
     TextEditingController _passwordController = TextEditingController();
     TextEditingController _passwordControllerConfirm = TextEditingController();
     return showDialog(
@@ -257,6 +259,13 @@ class _MenuScreenState extends State<MenuScreen> {
             content: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
+                TextFormField(
+                  obscureText: true,
+                  autocorrect: false,
+                  enableSuggestions: false,
+                  controller: _currentPasswordController,
+                  decoration: InputDecoration(hintText: 'Enter Current Password'),
+                ),
                 TextFormField(
                   obscureText: true,
                   autocorrect: false,
@@ -290,13 +299,12 @@ class _MenuScreenState extends State<MenuScreen> {
                   if (_passwordController.text ==
                       _passwordControllerConfirm.text) {
                     try {
-                      // if persistance causing issues with the signedIn bool could just sign out before anyone logs in?!
-                      //await auth.signOut();
-
-                      await auth.currentUser!
-                          .updatePassword(_passwordController.text);
+                      await Auth().changePassword(
+                          password: _currentPasswordController.text,
+                          newPassword: _passwordController.text);
                       ScaffoldMessenger.of(context).showSnackBar(
                           SnackBar(content: Text("Password changed!")));
+                      Navigator.pop(context);
                     } catch (e) {
                       ScaffoldMessenger.of(context).showSnackBar(
                           SnackBar(content: Text("Something went wrong.")));
@@ -305,8 +313,6 @@ class _MenuScreenState extends State<MenuScreen> {
                     ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(content: Text("Passwords didn't match!")));
                   }
-
-                  Navigator.pop(context);
                 },
               ),
             ],
