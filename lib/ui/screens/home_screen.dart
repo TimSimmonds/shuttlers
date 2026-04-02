@@ -60,19 +60,18 @@ class MenuItems {
   static const members = MenuItem('Members', Icons.people);
   static const ledger = MenuItem('Expenditure', Icons.list_alt_outlined);
 
-  static const all = <MenuItem>[
-    members,
-    ledger,
-  ];
+  static const all = <MenuItem>[members, ledger];
 }
 
 class MenuScreen extends StatefulWidget {
   final MenuItem currentItem;
   final ValueChanged<MenuItem> onSelectedItem;
 
-  const MenuScreen(
-      {Key? key, required this.currentItem, required this.onSelectedItem})
-      : super(key: key);
+  const MenuScreen({
+    Key? key,
+    required this.currentItem,
+    required this.onSelectedItem,
+  }) : super(key: key);
 
   @override
   State<MenuScreen> createState() => _MenuScreenState();
@@ -115,7 +114,7 @@ class _MenuScreenState extends State<MenuScreen> {
                     Text(
                       'Shuttlers',
                       // style: Theme.of(context).textTheme.headline5,
-                    )
+                    ),
                   ],
                 ),
               ),
@@ -126,28 +125,33 @@ class _MenuScreenState extends State<MenuScreen> {
                 minLeadingWidth: 20,
                 leading: Icon(Icons.account_balance),
                 title: StreamBuilder<DocumentSnapshot>(
-                    stream: store.overviewStream(),
-                    builder: (BuildContext context,
-                        AsyncSnapshot<DocumentSnapshot> snapshot) {
-                      if (snapshot.hasError) {
+                  stream: store.overviewStream(),
+                  builder:
+                      (
+                        BuildContext context,
+                        AsyncSnapshot<DocumentSnapshot> snapshot,
+                      ) {
+                        if (snapshot.hasError) {
+                          return Text(
+                            'Something went wrong...',
+                            style: TextStyle(color: Colors.white),
+                          );
+                        }
+                        if (snapshot.connectionState ==
+                            ConnectionState.waiting) {
+                          return Text(
+                            'Loading',
+                            style: TextStyle(color: Colors.white),
+                          );
+                        }
+                        Map<String, dynamic> data =
+                            snapshot.data!.data() as Map<String, dynamic>;
                         return Text(
-                          'Something went wrong...',
+                          'Bank ${prettyMoney(data['bank'])}',
                           style: TextStyle(color: Colors.white),
                         );
-                      }
-                      if (snapshot.connectionState == ConnectionState.waiting) {
-                        return Text(
-                          'Loading',
-                          style: TextStyle(color: Colors.white),
-                        );
-                      }
-                      Map<String, dynamic> data =
-                          snapshot.data!.data() as Map<String, dynamic>;
-                      return Text(
-                        'Bank ${prettyMoney(data['bank'])}',
-                        style: TextStyle(color: Colors.white),
-                      );
-                    }),
+                      },
+                ),
               ),
               ListTile(
                 minLeadingWidth: 20,
@@ -180,137 +184,165 @@ class _MenuScreenState extends State<MenuScreen> {
   }
 
   Widget buildMenuItem(MenuItem item) => ListTile(
-        selectedTileColor: Colors.black26,
-        selectedColor: Colors.white,
-        selected: widget.currentItem == item,
-        minLeadingWidth: 20,
-        leading: Icon(item.icon),
-        title: Text(item.title),
-        onTap: () => widget.onSelectedItem(item),
-      );
+    selectedTileColor: Colors.black26,
+    selectedColor: Colors.white,
+    selected: widget.currentItem == item,
+    minLeadingWidth: 20,
+    leading: Icon(item.icon),
+    title: Text(item.title),
+    onTap: () => widget.onSelectedItem(item),
+  );
 
   Future<void> passwordDialog(BuildContext context) async {
     TextEditingController _emailController = TextEditingController();
     TextEditingController _passwordController = TextEditingController();
     return showDialog(
-        context: context,
-        builder: (context) {
-          return AlertDialog(
-            title: Text('Login'),
-            content: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                TextField(
-                  controller: _emailController,
-                  keyboardType: TextInputType.emailAddress,
-                  autocorrect: false,
-                  enableSuggestions: false,
-                  decoration: InputDecoration(hintText: 'Enter Email'),
-                ),
-                TextField(
-                  obscureText: true,
-                  autocorrect: false,
-                  enableSuggestions: false,
-                  controller: _passwordController,
-                  decoration: InputDecoration(hintText: 'Enter Password'),
-                ),
-              ],
-            ),
-            actions: [
-              TextButton(
-                child: Text('CANCEL'),
-                onPressed: () {
-                  setState(() {
-                    Navigator.pop(context);
-                  });
-                },
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: Text('Login'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextField(
+                controller: _emailController,
+                keyboardType: TextInputType.emailAddress,
+                autocorrect: false,
+                enableSuggestions: false,
+                decoration: InputDecoration(hintText: 'Enter Email'),
               ),
-              TextButton(
-                child: Text('LOGIN'),
-                onPressed: () async {
-                  try {
-                    await auth.signInWithEmailAndPassword(
-                        email: _emailController.text,
-                        password: _passwordController.text);
-                    ScaffoldMessenger.of(context)
-                        .showSnackBar(SnackBar(content: Text("Logged in!")));
-                  } catch (e) {
-                    ScaffoldMessenger.of(context)
-                        .showSnackBar(SnackBar(content: Text("Login failed.")));
-                  }
-                  Navigator.pop(context);
-                },
+              TextField(
+                obscureText: true,
+                autocorrect: false,
+                enableSuggestions: false,
+                controller: _passwordController,
+                decoration: InputDecoration(hintText: 'Enter Password'),
               ),
             ],
-          );
-        });
+          ),
+          actions: [
+            TextButton(
+              child: Text('CANCEL'),
+              onPressed: () {
+                setState(() {
+                  Navigator.pop(context);
+                });
+              },
+            ),
+            TextButton(
+              child: Text('LOGIN'),
+              onPressed: () async {
+                try {
+                  await auth.signInWithEmailAndPassword(
+                    email: _emailController.text,
+                    password: _passwordController.text,
+                  );
+                  ScaffoldMessenger.of(
+                    context,
+                  ).showSnackBar(SnackBar(content: Text("Logged in!")));
+                } catch (e) {
+                  ScaffoldMessenger.of(
+                    context,
+                  ).showSnackBar(SnackBar(content: Text("Login failed.")));
+                }
+                Navigator.pop(context);
+              },
+            ),
+          ],
+        );
+      },
+    );
   }
 
   Future<void> _changePasswordDialog(BuildContext context) async {
+    TextEditingController _currentPasswordController = TextEditingController();
     TextEditingController _passwordController = TextEditingController();
     TextEditingController _passwordControllerConfirm = TextEditingController();
-    return showDialog(
-        context: context,
-        builder: (context) {
-          return AlertDialog(
-            title: Text('Change Password'),
-            content: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                TextFormField(
-                  obscureText: true,
-                  autocorrect: false,
-                  enableSuggestions: false,
-                  controller: _passwordController,
-                  decoration: InputDecoration(hintText: 'Enter New Password'),
-                ),
-                TextFormField(
-                  obscureText: true,
-                  autocorrect: false,
-                  enableSuggestions: false,
-                  controller: _passwordControllerConfirm,
-                  decoration: InputDecoration(hintText: 'Confirm New Password'),
-                )
-              ],
-            ),
-            actions: [
-              TextButton(
-                child: Text('CANCEL'),
-                onPressed: () {
-                  setState(() {
-                    Navigator.pop(context);
-                  });
-                },
+    await showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: Text('Change Password'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextFormField(
+                obscureText: true,
+                autocorrect: false,
+                enableSuggestions: false,
+                controller: _currentPasswordController,
+                decoration: InputDecoration(hintText: 'Enter Current Password'),
               ),
-              TextButton(
-                child: Text('CHANGE'),
-                onPressed: () async {
-                  setState(() {});
-
-                  if (_passwordController.text ==
-                      _passwordControllerConfirm.text) {
-                    try {
-                      // if persistance causing issues with the signedIn bool could just sign out before anyone logs in?!
-                      //await auth.signOut();
-
-                      await auth.currentUser!
-                          .updatePassword(_passwordController.text);
-                      ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(content: Text("Password changed!")));
-                    } catch (e) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(content: Text("Something went wrong.")));
-                    }
-                  } else {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text("Passwords didn't match!")));
-                  }
-
-                  Navigator.pop(context);
-                },
+              TextFormField(
+                obscureText: true,
+                autocorrect: false,
+                enableSuggestions: false,
+                controller: _passwordController,
+                decoration: InputDecoration(hintText: 'Enter New Password'),
+              ),
+              TextFormField(
+                obscureText: true,
+                autocorrect: false,
+                enableSuggestions: false,
+                controller: _passwordControllerConfirm,
+                decoration: InputDecoration(hintText: 'Confirm New Password'),
               ),
             ],
-          );
-        });
+          ),
+          actions: [
+            TextButton(
+              child: Text('CANCEL'),
+              onPressed: () {
+                if (context.mounted) Navigator.pop(context);
+              },
+            ),
+            TextButton(
+              child: Text('CHANGE'),
+              onPressed: () async {
+                if (_passwordController.text ==
+                    _passwordControllerConfirm.text) {
+                  try {
+                    String email = auth.currentUser!.email!;
+                    AuthCredential credential = EmailAuthProvider.credential(
+                      email: email,
+                      password: _currentPasswordController.text,
+                    );
+                    await auth.currentUser!.reauthenticateWithCredential(
+                      credential,
+                    );
+                    await auth.currentUser!.updatePassword(
+                      _passwordController.text,
+                    );
+                    if (context.mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text("Password changed!")),
+                      );
+                      Navigator.pop(context);
+                    }
+                  } catch (e) {
+                    if (context.mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text("Authentication or Update Failed."),
+                        ),
+                      );
+                    }
+                  }
+                } else {
+                  if (context.mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text("Passwords didn't match!")),
+                    );
+                  }
+                }
+              },
+            ),
+          ],
+        );
+      },
+    );
+    _currentPasswordController.dispose();
+    _passwordController.dispose();
+    _passwordControllerConfirm.dispose();
   }
 }
