@@ -1,0 +1,3 @@
+## 2024-05-24 - Cache Firestore Streams in StatefulWidgets
+**Learning:** `StreamBuilder` widgets that call `.snapshots()` directly in their `build` methods (e.g., via `Store().membersStream()`) create new stream instances on every rebuild. This leads to redundant Firestore subscriptions, wasted reads, and UI flickering.
+**Action:** Always cache streams returned by `Store` methods (or any other function that creates a new stream) in a `late final` variable within the `initState()` of a `StatefulWidget`, and pass that cached variable to the `StreamBuilder`.

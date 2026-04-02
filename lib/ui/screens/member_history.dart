@@ -13,14 +13,22 @@ class UserHistoryScreen extends StatefulWidget {
 }
 
 class UserHistoryScreenState extends State<UserHistoryScreen> {
+  late final Stream<QuerySnapshot> _historyStream;
+
+  @override
+  void initState() {
+    super.initState();
+    _historyStream = Store().historyStream(widget.member);
+  }
+
   Widget build(BuildContext context) {
     int x = 1;
     Column _buildIncomeHistory() {
       return Column(
         children: <Widget>[
           Expanded(
-            child: StreamBuilder(
-              stream: Store().historyStream(widget.member),
+            child: StreamBuilder<QuerySnapshot>(
+              stream: _historyStream,
               builder: (BuildContext context,
                   AsyncSnapshot<QuerySnapshot> snapshot) {
                 if (snapshot.hasError) {
