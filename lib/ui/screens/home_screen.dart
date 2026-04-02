@@ -247,6 +247,7 @@ class _MenuScreenState extends State<MenuScreen> {
   }
 
   Future<void> _changePasswordDialog(BuildContext context) async {
+    TextEditingController _currentPasswordController = TextEditingController();
     TextEditingController _passwordController = TextEditingController();
     TextEditingController _passwordControllerConfirm = TextEditingController();
     return showDialog(
@@ -257,6 +258,13 @@ class _MenuScreenState extends State<MenuScreen> {
             content: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
+                TextFormField(
+                  obscureText: true,
+                  autocorrect: false,
+                  enableSuggestions: false,
+                  controller: _currentPasswordController,
+                  decoration: InputDecoration(hintText: 'Enter Current Password'),
+                ),
                 TextFormField(
                   obscureText: true,
                   autocorrect: false,
@@ -293,10 +301,17 @@ class _MenuScreenState extends State<MenuScreen> {
                       // if persistance causing issues with the signedIn bool could just sign out before anyone logs in?!
                       //await auth.signOut();
 
+                      AuthCredential credential = EmailAuthProvider.credential(
+                          email: auth.currentUser!.email!,
+                          password: _currentPasswordController.text);
+                      await auth.currentUser!
+                          .reauthenticateWithCredential(credential);
+
                       await auth.currentUser!
                           .updatePassword(_passwordController.text);
                       ScaffoldMessenger.of(context).showSnackBar(
                           SnackBar(content: Text("Password changed!")));
+                      Navigator.pop(context);
                     } catch (e) {
                       ScaffoldMessenger.of(context).showSnackBar(
                           SnackBar(content: Text("Something went wrong.")));
@@ -305,8 +320,6 @@ class _MenuScreenState extends State<MenuScreen> {
                     ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(content: Text("Passwords didn't match!")));
                   }
-
-                  Navigator.pop(context);
                 },
               ),
             ],
