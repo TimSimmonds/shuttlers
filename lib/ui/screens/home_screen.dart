@@ -82,15 +82,18 @@ class _MenuScreenState extends State<MenuScreen> {
   FirebaseAuth auth = FirebaseAuth.instance;
   User? user;
   Store store = Store();
+  late final Stream<DocumentSnapshot> _overviewStream;
 
   @override
   void initState() {
+    super.initState();
+    // Cache the stream in initState to prevent redundant Firestore subscriptions on every rebuild
+    _overviewStream = store.overviewStream();
     auth.authStateChanges().listen((usr) {
       setState(() {
         this.user = usr;
       });
     });
-    super.initState();
   }
 
   @override
@@ -126,7 +129,7 @@ class _MenuScreenState extends State<MenuScreen> {
                 minLeadingWidth: 20,
                 leading: Icon(Icons.account_balance),
                 title: StreamBuilder<DocumentSnapshot>(
-                    stream: store.overviewStream(),
+                    stream: _overviewStream,
                     builder: (BuildContext context,
                         AsyncSnapshot<DocumentSnapshot> snapshot) {
                       if (snapshot.hasError) {
