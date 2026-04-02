@@ -21,3 +21,11 @@ A kitty app for my badminton group.
 
 - [ ] increase admin capability - edit previous games etc.
 - [ ] input cost through numberpad
+
+## Environment Variables
+
+To build or run the app, you need to provide Firebase API keys via `--dart-define`:
+
+```bash
+flutter run --dart-define=FIREBASE_WEB_API_KEY=your_web_key --dart-define=FIREBASE_ANDROID_API_KEY=your_android_key
+```
