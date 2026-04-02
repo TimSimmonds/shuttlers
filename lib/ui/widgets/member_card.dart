@@ -11,7 +11,6 @@ class MemberCard extends StatelessWidget {
   MemberCard(this.member);
 
   Widget build(BuildContext context) {
-    // print(currentUser);
     _openMemberHistory() {
       Navigator.push(
         context,
