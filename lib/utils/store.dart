@@ -6,10 +6,19 @@ import 'package:shuttlers/data.dart';
 import 'package:shuttlers/utils/math.dart';
 
 class Store {
-  DocumentReference overview =
+  // Singleton pattern to minimize object allocation
+  static final Store _instance = Store._internal();
+
+  factory Store() {
+    return _instance;
+  }
+
+  Store._internal();
+
+  final DocumentReference overview =
       FirebaseFirestore.instance.collection(overviewRef).doc('0');
-  CollectionReference member = FirebaseFirestore.instance.collection(memberRef);
-  CollectionReference ledger = FirebaseFirestore.instance.collection(ledgerRef);
+  final CollectionReference member = FirebaseFirestore.instance.collection(memberRef);
+  final CollectionReference ledger = FirebaseFirestore.instance.collection(ledgerRef);
 
   //members orded by name
   Stream<QuerySnapshot<Object?>> membersStream() {
