@@ -16,11 +16,13 @@ class MemberScreen extends StatefulWidget {
 }
 
 class _MemberScreenState extends State<MemberScreen> {
+  late final Stream<QuerySnapshot> _stream;
   FirebaseAuth auth = FirebaseAuth.instance;
   User? user;
 
   @override
   void initState() {
+    _stream = Store().membersStream();
     auth.authStateChanges().listen((usr) {
       setState(() {
         this.user = usr;
@@ -40,7 +42,7 @@ class _MemberScreenState extends State<MemberScreen> {
         ),
       ),
       body: StreamBuilder<QuerySnapshot>(
-        stream: Store().membersStream(),
+        stream: _stream,
         builder: (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
           if (!snapshot.hasData)
             return Center(

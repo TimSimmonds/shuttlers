@@ -79,12 +79,14 @@ class MenuScreen extends StatefulWidget {
 }
 
 class _MenuScreenState extends State<MenuScreen> {
+  late final Stream<DocumentSnapshot> _stream;
   FirebaseAuth auth = FirebaseAuth.instance;
   User? user;
   Store store = Store();
 
   @override
   void initState() {
+    _stream = store.overviewStream();
     auth.authStateChanges().listen((usr) {
       setState(() {
         this.user = usr;
@@ -126,7 +128,7 @@ class _MenuScreenState extends State<MenuScreen> {
                 minLeadingWidth: 20,
                 leading: Icon(Icons.account_balance),
                 title: StreamBuilder<DocumentSnapshot>(
-                    stream: store.overviewStream(),
+                    stream: _stream,
                     builder: (BuildContext context,
                         AsyncSnapshot<DocumentSnapshot> snapshot) {
                       if (snapshot.hasError) {
