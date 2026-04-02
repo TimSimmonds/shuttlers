@@ -247,9 +247,10 @@ class _MenuScreenState extends State<MenuScreen> {
   }
 
   Future<void> _changePasswordDialog(BuildContext context) async {
+    TextEditingController _currentPasswordController = TextEditingController();
     TextEditingController _passwordController = TextEditingController();
     TextEditingController _passwordControllerConfirm = TextEditingController();
-    return showDialog(
+    await showDialog(
         context: context,
         builder: (context) {
           return AlertDialog(
@@ -257,6 +258,13 @@ class _MenuScreenState extends State<MenuScreen> {
             content: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
+                TextFormField(
+                  obscureText: true,
+                  autocorrect: false,
+                  enableSuggestions: false,
+                  controller: _currentPasswordController,
+                  decoration: InputDecoration(hintText: 'Enter Current Password'),
+                ),
                 TextFormField(
                   obscureText: true,
                   autocorrect: false,
@@ -277,40 +285,50 @@ class _MenuScreenState extends State<MenuScreen> {
               TextButton(
                 child: Text('CANCEL'),
                 onPressed: () {
-                  setState(() {
-                    Navigator.pop(context);
-                  });
+                  Navigator.pop(context);
                 },
               ),
               TextButton(
                 child: Text('CHANGE'),
                 onPressed: () async {
-                  setState(() {});
-
-                  if (_passwordController.text ==
+                  if (_passwordController.text !=
                       _passwordControllerConfirm.text) {
-                    try {
-                      // if persistance causing issues with the signedIn bool could just sign out before anyone logs in?!
-                      //await auth.signOut();
-
-                      await auth.currentUser!
-                          .updatePassword(_passwordController.text);
+                    if (context.mounted) {
                       ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(content: Text("Password changed!")));
-                    } catch (e) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(content: Text("Something went wrong.")));
+                          SnackBar(content: Text("Passwords didn't match!")));
                     }
-                  } else {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text("Passwords didn't match!")));
+                    return;
                   }
 
-                  Navigator.pop(context);
+                  try {
+                    // Re-authenticate user before updating password
+                    final user = auth.currentUser!;
+                    AuthCredential credential = EmailAuthProvider.credential(
+                        email: user.email!,
+                        password: _currentPasswordController.text);
+                    await user.reauthenticateWithCredential(credential);
+
+                    await user.updatePassword(_passwordController.text);
+                    if (context.mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(content: Text("Password changed!")));
+                      Navigator.pop(context);
+                    }
+                  } catch (e) {
+                    if (context.mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(content: Text("Update failed. Check current password.")));
+                    }
+                    // Fail secure: Do not pop context on error.
+                  }
                 },
               ),
             ],
           );
         });
+
+    _currentPasswordController.dispose();
+    _passwordController.dispose();
+    _passwordControllerConfirm.dispose();
   }
 }
