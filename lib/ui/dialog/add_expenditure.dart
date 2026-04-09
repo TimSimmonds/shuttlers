@@ -90,11 +90,7 @@ class AddExpenditureDialogState extends State<AddExpenditureDialog> {
 
   String _buildSelectedMembersText() {
     if (selectedMembers.isNotEmpty) {
-      List<String> _names = [];
-      selectedMembers.forEach((element) {
-        _names.add(element.name);
-      });
-      _names.sort();
+      List<String> _names = selectedMembers.map((e) => e.name).toList()..sort();
       _selectedMembersText = _names.join(", ");
       return "$_selectedMembersText.";
     }
