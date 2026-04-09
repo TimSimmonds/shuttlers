@@ -11,11 +11,6 @@ class AddExpenditureDialog extends StatefulWidget {
   AddExpenditureDialogState createState() => AddExpenditureDialogState();
 }
 
-// enum ExpenseType {
-//   game,
-//   equipment,
-// }
-
 class AddExpenditureDialogState extends State<AddExpenditureDialog> {
   DateTime _date = DateTime.now();
   double _cost = 11.39;
