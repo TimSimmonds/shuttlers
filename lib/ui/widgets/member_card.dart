@@ -4,14 +4,11 @@ import 'package:shuttlers/ui/screens/member_history.dart';
 import 'package:shuttlers/utils/pretty.dart';
 
 class MemberCard extends StatelessWidget {
-  //final currentUser = FirebaseAuth.instance.currentUser;
-
   final Member member;
 
   MemberCard(this.member);
 
   Widget build(BuildContext context) {
-    // print(currentUser);
     _openMemberHistory() {
       Navigator.push(
         context,
