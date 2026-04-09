@@ -6,8 +6,9 @@ import 'package:shuttlers/data.dart';
 import 'package:shuttlers/utils/math.dart';
 
 class Store {
-  DocumentReference overview =
-      FirebaseFirestore.instance.collection(overviewRef).doc('0');
+  DocumentReference overview = FirebaseFirestore.instance
+      .collection(overviewRef)
+      .doc('0');
   CollectionReference member = FirebaseFirestore.instance.collection(memberRef);
   CollectionReference ledger = FirebaseFirestore.instance.collection(ledgerRef);
 
@@ -41,10 +42,7 @@ class Store {
 
     batch.update(overview, {'bank': FieldValue.increment(data.bank)});
     DocumentReference newMember = member.doc();
-    batch.set(newMember, {
-      'name': data.name,
-      'bank': data.bank,
-    });
+    batch.set(newMember, {'name': data.name, 'bank': data.bank});
     batch.set(ledger.doc(), {
       'date': Timestamp.now(),
       'members': newMember.id,
@@ -56,11 +54,12 @@ class Store {
     batch.commit();
   }
 
-  Future<void> addFunds(
-      {required Member data,
-      required double funds,
-      required IncomeType type,
-      required DateTime date}) async {
+  Future<void> addFunds({
+    required Member data,
+    required double funds,
+    required IncomeType type,
+    required DateTime date,
+  }) async {
     WriteBatch batch = FirebaseFirestore.instance.batch();
 
     batch.update(overview, {'bank': FieldValue.increment(funds)});
@@ -90,18 +89,14 @@ class Store {
 
     double _costPerMember = roundCost(cost / members.length);
     members.forEach((data) async {
-      batch.update(
-          member.doc(data.id), {'bank': FieldValue.increment(-_costPerMember)});
+      batch.update(member.doc(data.id), {
+        'bank': FieldValue.increment(-_costPerMember),
+      });
     });
 
     //this can be done better, i'm sure of it
-    List<String> memberIds = [];
-    List<String> memberString = [];
-    members.reversed.forEach((memberData) {
-      memberIds.add(memberData.id);
-      memberString.add(memberData.name);
-    });
-    memberString.sort();
+    List<String> memberIds = members.reversed.map((m) => m.id).toList();
+    List<String> memberString = members.map((m) => m.name).toList()..sort();
     String mString = memberString.join(', ');
 
     batch.set(ledger.doc(), {
