@@ -6,11 +6,18 @@ import 'package:shuttlers/data.dart';
 import 'package:shuttlers/utils/math.dart';
 
 class Store {
-  DocumentReference overview = FirebaseFirestore.instance
-      .collection(overviewRef)
-      .doc('0');
-  CollectionReference member = FirebaseFirestore.instance.collection(memberRef);
-  CollectionReference ledger = FirebaseFirestore.instance.collection(ledgerRef);
+  late final FirebaseFirestore _firestore;
+
+  Store({FirebaseFirestore? firestore})
+      : _firestore = firestore ?? FirebaseFirestore.instance {
+    overview = _firestore.collection(overviewRef).doc('0');
+    member = _firestore.collection(memberRef);
+    ledger = _firestore.collection(ledgerRef);
+  }
+
+  late final DocumentReference overview;
+  late final CollectionReference member;
+  late final CollectionReference ledger;
 
   //members orded by name
   Stream<QuerySnapshot<Object?>> membersStream() {
@@ -38,7 +45,7 @@ class Store {
 
   //add member to DB
   Future<void> addMember(Member data) async {
-    WriteBatch batch = FirebaseFirestore.instance.batch();
+    WriteBatch batch = _firestore.batch();
 
     batch.update(overview, {'bank': FieldValue.increment(data.bank)});
     DocumentReference newMember = member.doc();
@@ -51,7 +58,7 @@ class Store {
       'category': 0,
     });
 
-    batch.commit();
+    await batch.commit();
   }
 
   Future<void> addFunds({
@@ -60,7 +67,7 @@ class Store {
     required IncomeType type,
     required DateTime date,
   }) async {
-    WriteBatch batch = FirebaseFirestore.instance.batch();
+    WriteBatch batch = _firestore.batch();
 
     batch.update(overview, {'bank': FieldValue.increment(funds)});
     batch.update(member.doc(data.id), {'bank': FieldValue.increment(funds)});
@@ -73,7 +80,7 @@ class Store {
       'category': 0,
     });
 
-    batch.commit();
+    await batch.commit();
   }
 
   Future<void> addExpenditure({
@@ -83,7 +90,7 @@ class Store {
     required ExpenseType type,
     required int catergory,
   }) async {
-    WriteBatch batch = FirebaseFirestore.instance.batch();
+    WriteBatch batch = _firestore.batch();
 
     batch.update(overview, {'bank': FieldValue.increment(-cost)});
 
@@ -108,6 +115,6 @@ class Store {
       'mString': mString,
     });
 
-    batch.commit();
+    await batch.commit();
   }
 }
