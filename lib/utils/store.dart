@@ -89,7 +89,7 @@ class Store {
     batch.update(overview, {'bank': FieldValue.increment(-cost)});
 
     double _costPerMember = roundCost(cost / members.length);
-    members.forEach((data) async {
+    members.forEach((data) {
       batch.update(
           member.doc(data.id), {'bank': FieldValue.increment(-_costPerMember)});
     });
