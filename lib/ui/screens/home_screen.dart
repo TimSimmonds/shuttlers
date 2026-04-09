@@ -247,9 +247,11 @@ class _MenuScreenState extends State<MenuScreen> {
   }
 
   Future<void> _changePasswordDialog(BuildContext context) async {
-    TextEditingController _passwordController = TextEditingController();
-    TextEditingController _passwordControllerConfirm = TextEditingController();
-    return showDialog(
+    final TextEditingController _currentPasswordController = TextEditingController();
+    final TextEditingController _passwordController = TextEditingController();
+    final TextEditingController _passwordControllerConfirm = TextEditingController();
+
+    await showDialog(
         context: context,
         builder: (context) {
           return AlertDialog(
@@ -257,6 +259,13 @@ class _MenuScreenState extends State<MenuScreen> {
             content: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
+                TextFormField(
+                  obscureText: true,
+                  autocorrect: false,
+                  enableSuggestions: false,
+                  controller: _currentPasswordController,
+                  decoration: InputDecoration(hintText: 'Enter Current Password'),
+                ),
                 TextFormField(
                   obscureText: true,
                   autocorrect: false,
@@ -277,40 +286,53 @@ class _MenuScreenState extends State<MenuScreen> {
               TextButton(
                 child: Text('CANCEL'),
                 onPressed: () {
-                  setState(() {
+                  if (context.mounted) {
                     Navigator.pop(context);
-                  });
+                  }
                 },
               ),
               TextButton(
                 child: Text('CHANGE'),
                 onPressed: () async {
-                  setState(() {});
-
                   if (_passwordController.text ==
                       _passwordControllerConfirm.text) {
                     try {
-                      // if persistance causing issues with the signedIn bool could just sign out before anyone logs in?!
-                      //await auth.signOut();
+                      final currentUser = auth.currentUser;
+                      if (currentUser != null && currentUser.email != null) {
+                        final credential = EmailAuthProvider.credential(
+                          email: currentUser.email!,
+                          password: _currentPasswordController.text,
+                        );
 
-                      await auth.currentUser!
-                          .updatePassword(_passwordController.text);
-                      ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(content: Text("Password changed!")));
+                        await currentUser.reauthenticateWithCredential(credential);
+                        await currentUser.updatePassword(_passwordController.text);
+
+                        if (context.mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(content: Text("Password changed!")));
+                          Navigator.pop(context);
+                        }
+                      }
                     } catch (e) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(content: Text("Something went wrong.")));
+                      if (context.mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(content: Text("Authentication failed or something went wrong.")));
+                      }
                     }
                   } else {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text("Passwords didn't match!")));
+                    if (context.mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(content: Text("Passwords didn't match!")));
+                    }
                   }
-
-                  Navigator.pop(context);
                 },
               ),
             ],
           );
         });
+
+    _currentPasswordController.dispose();
+    _passwordController.dispose();
+    _passwordControllerConfirm.dispose();
   }
 }
