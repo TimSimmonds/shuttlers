@@ -25,6 +25,7 @@ dev_dependencies:
   flutter_test:
     sdk: flutter
   flutter_launcher_icons: ^0.14.4
+  fake_cloud_firestore: ^4.1.0+1
 
 flutter_icons:
   android: "launcher_icon"
