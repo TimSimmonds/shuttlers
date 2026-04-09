@@ -1,9 +1,3 @@
-# Sentinel Journal 🛡️
-
-## Security Improvements
-
-### [MEDIUM] Keyboard Caching of Sensitive Input
-- **Issue:** Email input field in `passwordDialog` was missing `enableSuggestions: false`.
-- **Impact:** OS-level keyboard might cache user emails, potentially exposing them.
-- **Fix:** Added `enableSuggestions: false` to the email `TextField` in `lib/ui/screens/home_screen.dart`.
-- **Date:** 2023-10-27
+## 2024-05-15 - Insecure Password Update Flow
+**Learning:** Found a critical vulnerability in `lib/ui/screens/home_screen.dart` where the password update flow did not require the current password, allowing potential account takeover if a device is left unlocked. The fix involved implementing re-authentication using `EmailAuthProvider.credential` and `reauthenticateWithCredential`. Additionally, the previous implementation did not follow "Fail Secure" behavior, immediately popping the dialog even on failure.
+**Action:** Always ensure sensitive operations like password changes require re-authentication. Enforce "Fail Secure" behavior in UI dialogs by keeping them open on failure. Ensure proper disposal of `TextEditingController`s and `StreamSubscription`s to prevent memory leaks, and use `if (context.mounted)` checks across async gaps.
