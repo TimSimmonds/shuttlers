@@ -18,15 +18,17 @@ class LedgerScreen extends StatefulWidget {
 class _LedgerScreenState extends State<LedgerScreen> {
   FirebaseAuth auth = FirebaseAuth.instance;
   User? user;
+  late final Stream<QuerySnapshot> _ledgerStream;
 
   @override
   void initState() {
+    super.initState();
+    _ledgerStream = Store().ledgerStream();
     auth.authStateChanges().listen((usr) {
       setState(() {
         this.user = usr;
       });
     });
-    super.initState();
   }
 
   @override
@@ -41,7 +43,7 @@ class _LedgerScreenState extends State<LedgerScreen> {
         ),
       ),
       body: StreamBuilder<QuerySnapshot>(
-        stream: Store().ledgerStream(),
+        stream: _ledgerStream,
         builder: (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
           if (!snapshot.hasData) {
             return Center(
